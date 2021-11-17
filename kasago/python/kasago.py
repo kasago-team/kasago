@@ -1,7 +1,9 @@
 from flask import Flask, json
+from flask_cors import CORS
 
 #Flaskオブジェクトを作る
 app = Flask(__name__)
+CORS(app)
 #写真フォルダのパス
 DATA_DIR = '/kasago/picture/'
 #キーワードリスト
