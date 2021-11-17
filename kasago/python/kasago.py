@@ -25,8 +25,9 @@ def getKasago():
 
 @app.route('/kasago/post')
 def postKasago():
+
     #画像を判定する処理
     #カサゴかどうかが95%以上だったら1を返す？違ったら0を返す
     return
 
-app.run(debug=True)
+app.run(debug=True,host='0.0.0.0')
