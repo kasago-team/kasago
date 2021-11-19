@@ -2,6 +2,7 @@ from flask import Flask, json
 from flask_cors import CORS
 from icrawler.builtin import BingImageCrawler
 import base64
+import random
 
 #Flaskオブジェクトを作る
 app = Flask(__name__)
@@ -42,10 +43,12 @@ def getKasago():
     fish = []
     for keyword, dirname in KEYWORDS.items():
         fish.append(crawl_image(keyword, dirname, DATA_COUNT, DATA_DIR))
-    print(fish)
     #画像をダウンロードする処理
+    #画像をbase64で返す処理
     params = {}
+    random.shuffle(fish)
     params["fish"] = fish
+    
     json_str = json.dumps(params, ensure_ascii=False, indent=2)
     return json_str
 
