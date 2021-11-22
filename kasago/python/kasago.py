@@ -1,4 +1,4 @@
-from flask import Flask, json
+from flask import Flask, json,request
 from flask_cors import CORS
 from icrawler.builtin import BingImageCrawler
 import base64
@@ -141,11 +141,13 @@ def getKasago():
     json_str = json.dumps(params, ensure_ascii=False, indent=2)
     return json_str
 #カサゴを判定する処理
-@app.route('/kasago/answer/get/<answer>')
-def postKasago(ansewr):
+@app.route('/kasago/answer/get')
+def postKasago():
+    req = request.json
+    b = req.get("base64")
     #確認テストファイル名
     image_file=r"decode.jpg"
-    img_binary = base64.b64decode(ansewr)
+    img_binary = base64.b64decode(b)
     jpg=np.frombuffer(img_binary,dtype=np.uint8)
     #raw image <- jpg
     img = cv2.imdecode(jpg, cv2.IMREAD_COLOR)
@@ -189,12 +191,7 @@ X_test = X_test.astype('float32') / 255
 y_train = keras.utils.np_utils.to_categorical(y_train.astype('int32'),OUT_SIZE)
 y_test = keras.utils.np_utils.to_categorical(y_test.astype('int32'),OUT_SIZE)
 
-    
-
-
-
 #入力と出力を指定
-
 im_rows = 150 #画像の縦ピクセルサイズ
 im_cols = 150 #画像の横のピクセルサイズ
 im_color = 3 #画像の色空間 / RGBカラー
