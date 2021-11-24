@@ -31,14 +31,14 @@ DATA_DIR = 'kasago/picture/'
 #キーワードリスト
 KEYWORDS = {"カサゴ":"kasago","マアジ":"maaji","フウセンウオ":"baloon","マンボウ":"manbo","ヒラメ":"hirame","安倍晋三":"penguin"}
 #ラベル
-LABEL_DIC = {"kasago":0, "maaji":1}
+LABEL_DIC = {"baloon":0, "hirame":1,"kasago":2,"maaji":3,"manbo":4,"penguin":5}
 #収集画像データ数
 DATA_COUNT = 1
 #画像サイズ
 V_SIZE=150
 H_SIZE=150
 #カテゴリ数
-OUT_SIZE=2
+OUT_SIZE=6
 
 #ルート
 @app.route('/')
@@ -121,7 +121,7 @@ def create_datasets(dirname):
             temp_img=load_img(image)
             temp_img_array=img_to_array(temp_img)
             X_train.append(temp_img_array)
-            y_train.append(LABEL_DIC["kasago"])
+            y_train.append(LABEL_DIC[row])
     X_train = np.array(X_train)
     y_train = np.array(y_train)
     return X_train,y_train
@@ -153,7 +153,7 @@ def postKasago():
     cv2.imwrite(image_file,img)
 
     #画像判定
-    test_imagefile_path =  + image_file
+    test_imagefile_path = image_file
     img_array = reshape_numpy(test_imagefile_path, 150,3)
     model = load_model(DATA_DIR + 'kasagoLearn.h5')
     probs = model.predict(img_array)
@@ -165,9 +165,10 @@ def postKasago():
     # plt.show()
 
     label = get_keys_from_value(LABEL_DIC, np.argmax(probs[0]))
+    print(label[0])
     print("AI判定画像は",probs[0][np.argmax(probs[0])]*100,"%の確立で",label,"です")
     params = {}
-    if probs[0][np.argmax(probs[0])]*100 > 95:
+    if label[0] == "kasago":
         params["answer"] = "1"
     else:
         params["answer"] = "0"
@@ -175,55 +176,62 @@ def postKasago():
     return json_str
 
 
+if __name__ == "__main__":
+    if not os.path.isfile(DATA_DIR + 'kasagoLearn.h5'):
+        #メイン処理 学習モデルが大きすぎるからサーバ起動時に学習モデルを作成
+        #画像が格納されたフォルダ内の画像全てをリサイズ
+        for dirname in KEYWORDS.values():
+            bundle_resize("kasago/dataset/" + dirname)
+        #testフォルダの初期化
+        if os.path.exists(DATA_DIR+'test'):
+            shutil.rmtree(DATA_DIR+'test/')
+        os.mkdir(DATA_DIR+'test')
+        #データセットの作成
+        X_train,y_train = create_datasets("kasago/dataset/")
+        #学習用とテスト用に分割する
+        X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size = 0.2, train_size = 0.8)
+        #データの正規化
+        X_train = X_train.astype('float32') / 255
+        X_test = X_test.astype('float32') / 255
+        #ラベルデータをOne-Hotベクトルに直す
+        y_train = keras.utils.np_utils.to_categorical(y_train.astype('int32'),OUT_SIZE)
+        y_test = keras.utils.np_utils.to_categorical(y_test.astype('int32'),OUT_SIZE)
 
-#メイン処理 学習モデルが大きすぎるからサーバ起動時に学習モデルを作成
-#画像が格納されたフォルダ内の画像全てをリサイズ
-#データセットの作成
-X_train,y_train = create_datasets("kasago/dataset/")
-#学習用とテスト用に分割する
-X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size = 0.2, train_size = 0.8)
-#データの正規化
-X_train = X_train.astype('float32') / 255
-X_test = X_test.astype('float32') / 255
-#ラベルデータをOne-Hotベクトルに直す
-y_train = keras.utils.np_utils.to_categorical(y_train.astype('int32'),OUT_SIZE)
-y_test = keras.utils.np_utils.to_categorical(y_test.astype('int32'),OUT_SIZE)
+        #入力と出力を指定
+        im_rows = 150 #画像の縦ピクセルサイズ
+        im_cols = 150 #画像の横のピクセルサイズ
+        im_color = 3 #画像の色空間 / RGBカラー
+        in_shape = (im_rows, im_cols, im_color)
+        out_size = 6 #分類数
+        epochs = 30 #学習回数
 
-#入力と出力を指定
-im_rows = 150 #画像の縦ピクセルサイズ
-im_cols = 150 #画像の横のピクセルサイズ
-im_color = 3 #画像の色空間 / RGBカラー
-in_shape = (im_rows, im_cols, im_color)
-out_size = 2 #分類数
-epochs = 1 #学習回数
+        #MLPモデルを定義
+        model = Sequential()
+        model.add(Conv2D(32,kernel_size=(3,3),
+                        activation='relu',
+                        input_shape=in_shape))
+        model.add(Conv2D(32,(3,3),activation='relu'))
+        model.add(MaxPool2D(pool_size=(2,2)))
+        model.add(Dropout(0.25))
+        model.add(Flatten())
+        model.add(Dense(128,activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(out_size,activation='softmax'))
 
-#MLPモデルを定義
-model = Sequential()
-model.add(Conv2D(32,kernel_size=(3,3),
-                 activation='relu',
-                 input_shape=in_shape))
-model.add(Conv2D(32,(3,3),activation='relu'))
-model.add(MaxPool2D(pool_size=(2,2)))
-model.add(Dropout(0.25))
-model.add(Flatten())
-model.add(Dense(128,activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(out_size,activation='softmax'))
+        #モデルを構築
+        model.compile(
+            loss='categorical_crossentropy',
+            optimizer=RMSprop(),
+            metrics=['accuracy']
+        )
 
-#モデルを構築
-model.compile(
-    loss='categorical_crossentropy',
-    optimizer=RMSprop(),
-    metrics=['accuracy']
-)
+        #学習
+        hist = model.fit(X_train,y_train,
+                        batch_size=128,
+                        epochs=epochs,
+                        verbose=1,
+                        validation_data=(X_test,y_test))
 
-#学習
-hist = model.fit(X_train,y_train,
-                 batch_size=128,
-                 epochs=epochs,
-                 verbose=1,
-                 validation_data=(X_test,y_test))
-
-model.save(DATA_DIR + 'kasagoLearn.h5')
-print("saved")
-app.run(debug=True,host='0.0.0.0')
+        model.save(DATA_DIR + 'kasagoLearn.h5')
+        print("saved")
+    app.run(debug=True,host='0.0.0.0')
