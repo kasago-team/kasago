@@ -184,8 +184,6 @@ if __name__ == "__main__":
         #画像が格納されたフォルダ内の画像全てをリサイズ
         for dirname in KEYWORDS.values():
             bundle_resize("kasago/dataset/" + dirname)
-            print("kasago/dataset/" + dirname )
-            print("ok")
         #testフォルダの初期化
         if os.path.exists(DATA_DIR+'test'):
             shutil.rmtree(DATA_DIR+'test/')

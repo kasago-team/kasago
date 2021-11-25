@@ -6,7 +6,7 @@ import base64
 #写真フォルダのパス
 DATA_DIR = "kasago/dataset/"
 #キーワードリスト
-KEYWORDS = {"うみうし":"umiusi"}
+KEYWORDS = {"ペペロンチーノ":"pepe"}
 #ラベル
 LABEL_DIC = {"kasago":0, "maaji":1}
 #収集画像データ数
