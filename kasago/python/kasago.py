@@ -29,9 +29,9 @@ CORS(app)
 #写真フォルダのパス
 DATA_DIR = 'kasago/picture/'
 #キーワードリスト
-KEYWORDS = {"カサゴ":"kasago","マアジ":"maaji","フウセンウオ":"baloon","マンボウ":"manbo","ヒラメ":"hirame","安倍晋三":"penguin"}
+KEYWORDS = {"イカ":"ika","カサゴ":"kasago","マアジ":"maaji","マンボウ":"manbo","安倍晋三":"penguin","ウミウシ":"umiusi"}
 #ラベル
-LABEL_DIC = {"baloon":0, "hirame":1,"kasago":2,"maaji":3,"manbo":4,"penguin":5}
+LABEL_DIC = {"ika":0, "kasago":1,"maaji":2,"manbo":3,"penguin":4,"umiusi":5}
 #収集画像データ数
 DATA_COUNT = 1
 #画像サイズ
@@ -90,6 +90,8 @@ def bundle_resize(dirname):
   """
   path_list = glob.glob(dirname + "/*")
   for path in path_list:
+    print(path)
+    print("ok")
     path = path.replace('\\','/')
     img = resize(path,V_SIZE,H_SIZE)
     cv2.imwrite(path,img)
@@ -182,6 +184,8 @@ if __name__ == "__main__":
         #画像が格納されたフォルダ内の画像全てをリサイズ
         for dirname in KEYWORDS.values():
             bundle_resize("kasago/dataset/" + dirname)
+            print("kasago/dataset/" + dirname )
+            print("ok")
         #testフォルダの初期化
         if os.path.exists(DATA_DIR+'test'):
             shutil.rmtree(DATA_DIR+'test/')
