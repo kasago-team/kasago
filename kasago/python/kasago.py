@@ -203,7 +203,7 @@ if __name__ == "__main__":
         im_color = 3 #画像の色空間 / RGBカラー
         in_shape = (im_rows, im_cols, im_color)
         out_size = 6 #分類数
-        epochs = 30 #学習回数
+        epochs = 50 #学習回数
 
         #MLPモデルを定義
         model = Sequential()
