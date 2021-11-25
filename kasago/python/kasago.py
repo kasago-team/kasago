@@ -90,8 +90,6 @@ def bundle_resize(dirname):
   """
   path_list = glob.glob(dirname + "/*")
   for path in path_list:
-    print(path)
-    print("ok")
     path = path.replace('\\','/')
     img = resize(path,V_SIZE,H_SIZE)
     cv2.imwrite(path,img)
