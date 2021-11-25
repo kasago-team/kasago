@@ -29,9 +29,9 @@ CORS(app)
 #写真フォルダのパス
 DATA_DIR = 'kasago/picture/'
 #キーワードリスト
-KEYWORDS = {"イカ":"ika","カサゴ":"kasago","マアジ":"maaji","マンボウ":"manbo","安倍晋三":"penguin","ウミウシ":"umiusi"}
+KEYWORDS = {"カサゴ":"kasago","マアジ":"maaji","みかん":"mikan","安倍晋三":"penguin","ペペロンチーノ":"pepe","ウミウシ":"umiusi"}
 #ラベル
-LABEL_DIC = {"ika":0, "kasago":1,"maaji":2,"manbo":3,"penguin":4,"umiusi":5}
+LABEL_DIC = {"kasago":0,"maaji":1,"mikan":2,"penguin":3,"pepe":4, "umiusi":5}
 #収集画像データ数
 DATA_COUNT = 1
 #画像サイズ
